@@ -1,0 +1,46 @@
+<header class="navbar">
+
+    <a href="{{ url_for('dashboard') }}">
+        <img class="logo_main" src="{{ url_for('static', filename='images/logo/logo.jpeg') }}">
+    </a>
+
+    <a href="{{ url_for('dashboard') }}">
+        <h2 class="logo">MOODFLOW AI</h2>
+    </a>
+
+    <div class="menu-container">
+
+        <div class="menu-icon" onclick="toggleMenu()">☰</div>
+
+        <div id="dropdownMenu" class="dropdown-menu">
+
+            {% if session.get("user_id") %}
+
+            <!-- ✅ FIXED USER INFO -->
+            <div class="user-info">
+                <img class="profile-img"
+                    src="{{ url_for('static', filename='uploads/' + (current_user.profile_pic or 'default.png')) }}?v={{ current_user.profile_pic or '1' }}">
+
+                <span class="username">
+                    {{ session.get("username") }}
+                </span>
+            </div>
+
+            <a href="{{ url_for('user_bp.update_profile') }}">Update Profile</a>
+            <a href="{{ url_for('user_bp.profile') }}">View Profile</a>
+            <a href="{{ url_for('mood_history') }}">Mood History</a>
+            <a href="{{ url_for('contact') }}">Contact Us</a>
+            <a href="{{ url_for('about') }}">About Us</a>
+            <a href="{{ url_for('auth_bp.logout') }}">Logout</a>
+
+            {% else %}
+
+            <a href="{{ url_for('auth_bp.login') }}">Register / Login</a>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</header>

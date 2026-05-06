@@ -1,0 +1,141 @@
+ /* 🔥 BACKGROUND EFFECT (SAFE) */
+ body::before,
+ body::after {
+     content: "";
+     position: fixed;
+     width: 400px;
+     height: 400px;
+     opacity: 0.3;
+     pointer-events: none;
+     z-index: -1;
+ }
+
+ body::before {
+     background: radial-gradient(circle, #00c6ff, transparent);
+     top: -100px;
+     left: -100px;
+ }
+
+ body::after {
+     background: radial-gradient(circle, #ff00cc, transparent);
+     bottom: -100px;
+     right: -100px;
+ }
+
+ /* 🔥 HEADER CLICK FIX */
+ .navbar {
+     z-index: 99999 !important;
+ }
+
+ .menu-container {
+     z-index: 100000 !important;
+     position: relative;
+ }
+
+ .menu-icon {
+     position: relative;
+     z-index: 100001;
+ }
+
+ .dropdown-menu {
+     z-index: 100002 !important;
+ }
+
+ /* CENTER */
+ .main_container {
+     min-height: calc(100vh - 70px);
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     margin-top: 80px;
+     position: relative;
+     z-index: 1;
+ }
+
+ /* 🔥 PROFILE CARD (BINDAS LOOK) */
+ .profile_card {
+     width: 420px;
+     padding: 35px;
+     border-radius: 25px;
+     background: rgba(255, 255, 255, 0.08);
+     backdrop-filter: blur(25px);
+
+     box-shadow:
+         0 0 40px rgba(0, 0, 0, 0.6),
+         0 0 20px rgba(76, 175, 80, 0.3);
+
+     text-align: center;
+     position: relative;
+     z-index: 2;
+     transition: 0.3s;
+ }
+
+ .profile_card:hover {
+     transform: translateY(-8px) scale(1.02);
+     box-shadow:
+         0 0 50px rgba(0, 0, 0, 0.7),
+         0 0 30px rgba(76, 175, 80, 0.5);
+ }
+
+ /* IMAGE */
+ .profile-img-large {
+     width: 120px;
+     height: 120px;
+     border-radius: 50%;
+     border: 3px solid #4caf50;
+     object-fit: cover;
+     margin-bottom: 10px;
+     transition: 0.3s;
+ }
+
+ .profile-img-large:hover {
+     transform: scale(1.1) rotate(3deg);
+     box-shadow: 0 0 25px #4caf50;
+ }
+
+ .email {
+     color: #ccc;
+     margin-bottom: 15px;
+ }
+
+ /* INFO */
+ .info {
+     text-align: left;
+     margin-top: 10px;
+ }
+
+ .info p {
+     margin: 10px 0;
+     padding: 10px;
+     border-radius: 10px;
+     background: rgba(255, 255, 255, 0.05);
+     transition: 0.3s;
+ }
+
+ .info p:hover {
+     background: rgba(76, 175, 80, 0.2);
+     transform: translateX(5px);
+ }
+
+ .info span {
+     color: #4caf50;
+     font-weight: bold;
+ }
+
+ /* BUTTON */
+ .btn {
+     margin-top: 25px;
+     display: inline-block;
+     padding: 12px 25px;
+     border-radius: 10px;
+     background: linear-gradient(45deg, #4caf50, #00c6ff);
+     color: white;
+     font-weight: bold;
+     text-decoration: none;
+     transition: 0.3s;
+ }
+
+ .btn:hover {
+     transform: scale(1.08);
+     box-shadow: 0 0 20px rgba(0, 198, 255, 0.7);
+ }

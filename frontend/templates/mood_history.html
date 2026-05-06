@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Mood Dashboard</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mood_history.css') }}">
+</head>
+
+<body>
+
+    {% include "header.html" %}
+    <div class="main_container">
+        <h1>🔥 Mood History</h1>
+
+        <div class="insight" id="insight">Loading insight...</div>
+
+        <!-- FILTER -->
+        <div class="filter-box">
+            <select id="filterType">
+                <option value="">All</option>
+                <option value="daily">Today</option>
+                <option value="weekly">Last 7 Days</option>
+                <option value="monthly">Last 30 Days</option>
+                <option value="custom">Custom</option>
+            </select>
+
+            <input type="date" id="startDate">
+            <input type="date" id="endDate">
+
+            <button onclick="applyFilter()">Apply</button>
+        </div>
+
+        <div class="container">
+
+            <div class="card-large">
+                <h2>Emotion Analytics</h2>
+                <canvas id="chart"></canvas>
+            </div>
+
+            <div class="card">
+                <h2>Recent Mood History</h2>
+                <div class="list" id="history"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 🔥 EXTERNAL CHART JS -->
+    <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    {% include "footer.html" %}
+</body>
+
+</html>

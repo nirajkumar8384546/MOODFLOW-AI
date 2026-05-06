@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Contact Us - MoodFlow AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/contact.css') }}">
+</head>
+
+<body>
+    {% include "header.html" %}
+    <div class="container">
+        <div class="card">
+
+            <h2>📩 Contact Us</h2>
+
+            <!-- 🔥 SHORT ABOUT -->
+            <p>
+                MoodFlow AI is a smart platform that detects emotions using face, voice, text, and video.
+                It helps users track mood and understand emotional patterns in real-time.
+            </p>
+
+            <!-- 📞 CONTACT OPTIONS -->
+            <p>📧 moodflow.ai@gmail.com</p>
+            <p>📱 +91-XXXXXXXXXX</p>
+
+            <!-- 🔥 QUICK BUTTONS -->
+            <a href="https://wa.me/91XXXXXXXXXX?text=Hello%20MoodFlow%20AI" target="_blank">
+                <button class="btn-wa">WhatsApp Chat 💬</button>
+            </a>
+
+            <a href="mailto:moodflow.ai@gmail.com">
+                <button class="btn-mail">Send Email 📧</button>
+            </a>
+
+            <!-- 📩 FORM -->
+            <input type="text" id="name" placeholder="Your Name">
+            <input type="email" id="email" placeholder="Your Email">
+            <textarea id="message" placeholder="Your Message"></textarea>
+
+            <button class="btn-main" onclick="sendMessage()">Send Message</button>
+
+            <div class="success" id="successMsg"></div>
+
+        </div>
+    </div>
+    {% include "footer.html" %}
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/contact.js') }}"></script>
+</body>
+
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>MOODFLOW AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    {% include 'header.html' %}
+
+    <div class="face_area">
+
+        <div class="camera-box">
+            <video id="video" autoplay muted playsinline></video>
+            <canvas id="canvas"></canvas>
+        </div>
+
+        <h2 id="result">Emotion: ...</h2>
+
+        <button onclick="startCamera()">Start Camera</button>
+
+    </div>
+    {% include 'footer.html' %}
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/face_emo.js') }}"></script>
+</body>
+
+</html>

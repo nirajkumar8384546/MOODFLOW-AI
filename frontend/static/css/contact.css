@@ -1,0 +1,71 @@
+.container {
+    width: 100%;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
+}
+
+.card {
+    background: rgba(30, 41, 59, 0.9);
+    padding: 20px;
+    border-radius: 15px;
+    width: 420px;
+    height: 520px;
+    margin-top: 20px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+}
+
+h2 {
+    text-align: center;
+}
+
+p {
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+input,
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+}
+
+textarea {
+    height: 90px;
+}
+
+button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-main {
+    background: #38bdf8;
+    color: black;
+}
+
+.btn-wa {
+    background: #25D366;
+    color: white;
+}
+
+.btn-mail {
+    background: #ea4335;
+    color: white;
+}
+
+.success {
+    text-align: center;
+    margin-top: 10px;
+    color: lightgreen;
+}

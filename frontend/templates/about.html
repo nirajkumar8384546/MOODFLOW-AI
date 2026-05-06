@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>About Us - MoodFlow AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/about.css') }}">
+</head>
+
+<body>
+    {% include "header.html" %}
+    <h1>🚀 About MoodFlow AI</h1>
+
+    <div class="container">
+
+        <!-- INTRO -->
+        <div class="card">
+            <h2>🌟 Who We Are</h2>
+            <p>
+                <span class="highlight">MoodFlow AI</span> is an advanced multi-modal emotion detection platform
+                designed to understand human emotions using AI. It analyzes facial expressions, voice tone,
+                text input, and video signals to provide real-time emotional insights.
+            </p>
+        </div>
+
+        <!-- MISSION -->
+        <div class="card">
+            <h2>🎯 Our Mission</h2>
+            <p>
+                Our mission is to bridge the gap between technology and human emotions by providing intelligent tools
+                that help users track, understand, and improve their emotional well-being.
+            </p>
+        </div>
+
+        <!-- FEATURES -->
+        <div class="card">
+            <h2>⚡ What We Offer</h2>
+            <div class="grid">
+                <div class="feature">😊 Face Emotion Detection</div>
+                <div class="feature">🎤 Voice Emotion Analysis</div>
+                <div class="feature">📝 Text Sentiment Detection</div>
+                <div class="feature">🎥 Video + Audio Fusion AI</div>
+                <div class="feature">📊 Real-time Mood Dashboard</div>
+                <div class="feature">🤖 AI Insights & Analytics</div>
+            </div>
+        </div>
+
+        <!-- HOW IT WORKS -->
+        <div class="card">
+            <h2>⚙️ How It Works</h2>
+            <p>
+                MoodFlow AI combines deep learning models trained on emotional datasets. It processes multiple inputs
+                simultaneously and generates accurate predictions, which are then visualized in an interactive
+                dashboard.
+            </p>
+        </div>
+
+        <!-- FUTURE SCOPE -->
+        <div class="card">
+            <h2>🚀 Future Scope</h2>
+            <p>
+                We aim to expand MoodFlow AI with advanced features like real-time AI assistants, mental health
+                tracking,
+                personalized recommendations, emotion-based music suggestions, and integration with wearable devices.
+            </p>
+        </div>
+
+        <!-- WHY CHOOSE -->
+        <div class="card">
+            <h2>💡 Why Choose Us?</h2>
+            <div class="grid">
+                <div class="feature">🔥 Multi-Modal AI System</div>
+                <div class="feature">⚡ Real-Time Processing</div>
+                <div class="feature">📊 Smart Analytics</div>
+                <div class="feature">🔒 Secure Data Handling</div>
+                <div class="feature">🎯 Accurate Predictions</div>
+                <div class="feature">💻 User-Friendly Interface</div>
+            </div>
+        </div>
+
+        <!-- VISION -->
+        <div class="card">
+            <h2>🌍 Our Vision</h2>
+            <p>
+                To create a world where AI understands human emotions and helps people lead healthier, more balanced
+                lives.
+            </p>
+        </div>
+
+    </div>
+    {% include "footer.html" %}
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

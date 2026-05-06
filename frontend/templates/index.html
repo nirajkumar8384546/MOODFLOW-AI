@@ -1,0 +1,103 @@
+<!--frontend/templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>MOODFLOW AI</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script>
+        setTimeout(function () {
+            fetch("/auth/check-login")
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.logged_in) {
+                        window.location.href = "/auth/login";
+                    }
+                });
+        }, 200000);
+    </script>
+</head>
+
+<body>
+
+    {% include 'header.html' %}
+
+    <div class="container">
+        <h1 class="clr">technology That Understands How You Feel</h1>
+        <p class="tagline">Not every feeling needs words. When words fall short, understanding matters — because your
+            feelings truly matter.</p>
+
+        <div class="modes">
+
+            <!-- ================= FACE ONLY ================= -->
+            <a href="{{url_for('face_only_emo')}}">
+                <div class="card1">
+                    <div class="carousel">
+                        <div class="track" id="track">
+
+                            {% for i in range(1,10) %}
+                            <img src="{{ url_for('static', filename='images/image'~i~'.png') }}" alt="Image">
+                            {% endfor %}
+
+                        </div>
+                    </div>
+
+                    <span>📷 Face Only</span>
+                </div>
+            </a>
+
+
+            <!-- ================= AUDIO + TEXT ================= -->
+            <div class="frames">
+                <div class="modes1">
+
+                    <a href="{{url_for('audio_text')}}">
+                        <div class="card">
+
+                            <div class="carousel-1">
+                                <div class="track_1" id="track_1">
+
+                                    {% for i in range(1, 15) %}
+                                    <img src="{{ url_for('static', filename='images/audio/audio' ~ i ~ '.png') }}"
+                                        alt="Audio Image">
+                                    {% endfor %}
+
+                                </div>
+                            </div>
+
+                            <span>🎤 + 📝 Audio + Text</span>
+                        </div>
+                    </a>
+
+                </div>
+                <div class="modes2">
+                    <a href="{{url_for('video_audio')}}">
+                        <div class="card">
+                            <div class="carousel-2">
+
+                                <div class="track_2" id="track_2">
+
+                                    {% for i in range(1, 9) %}
+                                    <img src="{{ url_for('static', filename='images/video/vid' ~ i ~ '.png') }}"
+                                        alt="Audio Image">
+                                    {% endfor %}
+
+                                </div>
+                            </div>
+                            <span1>📷 + 🎤</span1>
+                            <span>Face + Audio</span>
+                        </div>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    {% include 'footer.html' %}
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

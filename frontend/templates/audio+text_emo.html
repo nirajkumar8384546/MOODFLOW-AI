@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>MOODFLOW AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .box {
+            background: rgba(8, 8, 8, 0.6);
+            padding: 20px;
+            border-radius: 15px;
+            width: 350px;
+            text-align: center;
+            height: 400px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: none;
+            background: linear-gradient(45deg, #00c6ff, #0072ff);
+            color: white;
+            cursor: pointer;
+        }
+
+        .bar {
+            height: 8px;
+            border-radius: 10px;
+            background: #444;
+            margin-top: 5px;
+        }
+
+        .fill {
+            height: 100%;
+            background: #00c6ff;
+        }
+    </style>
+</head>
+
+<body>
+
+    {% include 'header.html' %}
+
+    <div class="container">
+
+        <!-- AUDIO -->
+        <div class="box">
+            <h3>🎤 Audio Emotion</h3>
+            <button id="startBtn">Start</button>
+            <button onclick="refreshAudio()">Refresh</button>
+            <textarea id="audioText"></textarea>
+            <div id="audioResult">...</div>
+        </div>
+
+        <!-- TEXT -->
+        <div class="box">
+            <h3>📝 Text Emotion</h3>
+            <textarea id="textInput"></textarea>
+            <button id="textBtn">Analyze</button>
+            <button onclick="refreshText()">Refresh</button>
+            <div id="textResult">...</div>
+        </div>
+
+    </div>
+
+    {% include 'footer.html' %}
+
+    <script>
+
+        let recognition, mediaRecorder, chunks = [];
+        let recording = false;
+
+        let lastProcessTime = 0; // 🔥 NEW: anti-spam control
+
+        const startBtn = document.getElementById("startBtn");
+        const audioResult = document.getElementById("audioResult");
+
+        function createBar(v) {
+            v = Math.max(0, Math.min(v || 0, 100));
+            return `<div class="bar"><div class="fill" style="width:${v}%"></div></div>`;
+        }
+
+        function refreshAudio() {
+            document.getElementById("audioText").value = "";
+            audioResult.innerHTML = "...";
+        }
+
+        function refreshText() {
+            document.getElementById("textInput").value = "";
+            document.getElementById("textResult").innerHTML = "...";
+        }
+
+        // =========================
+        // START RECORDING
+        // =========================
+        async function startRecording() {
+
+            if (recording) return;
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                mediaRecorder = new MediaRecorder(stream);
+                chunks = [];
+
+                mediaRecorder.ondataavailable = e => {
+                    if (e.data.size > 0) chunks.push(e.data);
+                };
+
+                mediaRecorder.onstop = processAudio;
+
+                mediaRecorder.start();
+
+                recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                recognition.lang = "en-IN";
+
+                recognition.onresult = e => {
+                    document.getElementById("audioText").value =
+                        e.results[0][0].transcript;
+                };
+
+                recognition.start();
+
+                recording = true;
+                startBtn.style.display = "none";
+
+                setTimeout(stopRecording, 5000); // 🔥 SLOWER (was 4 sec)
+
+            } catch {
+                alert("Mic access denied ❌");
+            }
+        }
+
+        // =========================
+        // STOP RECORDING
+        // =========================
+        function stopRecording() {
+
+            if (!recording) return;
+
+            recording = false;
+            startBtn.style.display = "inline-block";
+
+            if (recognition) recognition.stop();
+            if (mediaRecorder) mediaRecorder.stop();
+        }
+
+        // =========================
+        // PROCESS AUDIO (OPTIMIZED)
+        // =========================
+        async function processAudio() {
+
+            // 🔥 SPAM PROTECTION (min 3 sec gap)
+            let now = Date.now();
+            if (now - lastProcessTime < 3000) return;
+            lastProcessTime = now;
+
+            let text = document.getElementById("audioText").value.trim();
+
+            if (!text) {
+                audioResult.innerText = "No speech ❌";
+                return;
+            }
+
+            const blob = new Blob(chunks, { type: "audio/webm" });
+
+            let fd = new FormData();
+            fd.append("audio", blob, "rec.webm");
+            fd.append("text", text);
+
+            audioResult.innerText = "Analyzing...";
+
+            const res = await fetch("/analyze-audio-text", {
+                method: "POST",
+                body: fd
+            });
+
+            const data = await res.json();
+
+            // 🔥 SAFE CONFIDENCE HANDLING
+            let audioConf = Math.max(0, Math.min(Number(data.audio_confidence || 0), 100));
+            let textConf = Math.max(0, Math.min(Number(data.text_confidence || 0), 100));
+
+            audioResult.innerHTML =
+                `🎤 ${data.audio_emotion} (${audioConf.toFixed(1)}%)
+            ${createBar(audioConf)}
+            <br>🧠 ${data.text_emotion} (${textConf.toFixed(1)}%)
+            ${createBar(textConf)}
+            <br><b>FINAL → ${data.final_emotion}</b>`;
+        }
+
+        // =========================
+        // TEXT ANALYSIS (OPTIMIZED)
+        // =========================
+        document.getElementById("textBtn").addEventListener("click", async () => {
+
+            let text = document.getElementById("textInput").value.trim();
+            if (!text) return;
+
+            // 🔥 SPAM CONTROL
+            let now = Date.now();
+            if (now - lastProcessTime < 2000) return;
+            lastProcessTime = now;
+
+            const res = await fetch("/analyze-audio-text", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: text })
+            });
+
+            const data = await res.json();
+
+            let textConf = Math.max(0, Math.min(Number(data.text_confidence || 0), 100));
+
+            document.getElementById("textResult").innerHTML =
+                `${data.final_emotion} (${textConf.toFixed(1)}%)
+            ${createBar(textConf)}`;
+        });
+
+        startBtn.addEventListener("click", startRecording);
+
+    </script>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

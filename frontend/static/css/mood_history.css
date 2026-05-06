@@ -1,0 +1,77 @@
+ .main_container {
+     width: 90%;
+     margin: auto;
+     display: flex;
+     flex-wrap: wrap;
+     flex-direction: column;
+     justify-content: center;
+     align-items: center;
+     margin-top: 75px;
+ }
+
+ .container {
+     width: 90%;
+ }
+
+ .card {
+     background: #1e293b;
+     padding: 20px;
+     border-radius: 15px;
+     margin-top: 20px;
+     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+ }
+
+ .card-large {
+     background: #1f211e;
+     border-radius: 15px;
+     padding: 20px;
+     box-shadow: 0 0 20px rgba(241, 237, 237, 0.5);
+     width: 70%;
+     display: flex;
+     flex-wrap: wrap;
+     justify-content: center;
+     height: 440px;
+     margin: auto;
+     margin-top: -60px;
+ }
+
+ h1 {
+     text-align: center;
+     margin-top: 20px;
+ }
+
+ h2 {
+     text-align: center;
+     margin-top: -25px;
+ }
+
+ .list {
+     max-height: 300px;
+     overflow-y: auto;
+ }
+
+ .item {
+     padding: 10px;
+     border-bottom: 1px solid #1ed671;
+ }
+
+ .insight {
+     font-size: 18px;
+     text-align: center;
+     margin-top: 10px;
+     color: #38bdf8;
+ }
+
+ .filter-box {
+     margin: 10px;
+     text-align: center;
+ }
+
+ select,
+ input,
+ button {
+     padding: 6px;
+     margin: 5px;
+     border-radius: 6px;
+     border: none;
+ }
