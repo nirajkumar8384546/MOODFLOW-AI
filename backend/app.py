@@ -87,7 +87,10 @@ def dashboard():
 @login_required
 def face_only_emo():
     return render_template("face_only_emo.html")
-
+    
+@app.route("/contact")
+def contact():
+    return render_template("contact.html")
 # Global Error Handlers
 @app.errorhandler(404)
 def not_found(e):
