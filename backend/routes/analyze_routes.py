@@ -1,6 +1,3 @@
-# Fixed `analyze_routes.py` for Render Deployment (Optimized)
-
-```python
 from flask import Blueprint, request, jsonify
 import cv2
 import numpy as np
@@ -318,69 +315,4 @@ def analyze_fusion():
     except Exception as e:
         print("❌ FUSION ERROR:", e)
         return jsonify({"error": str(e)}), 500
-```
 
----
-
-# IMPORTANT CHANGES
-
-## ✅ Removed
-
-```python
-clear_module_memory()
-```
-
-Kyunki har request me TensorFlow model unload/load ho raha tha.
-
----
-
-## ✅ Better for Render
-
-* RAM stable rahegi
-* TensorFlow crash kam hoga
-* Response faster hoga
-* Service restart kam hogi
-
----
-
-# REQUIRED `requirements.txt`
-
-```txt
-flask
-flask_sqlalchemy
-flask_migrate
-gunicorn
-opencv-python-headless
-numpy
-tensorflow-cpu
-ffmpeg-python
-librosa
-soundfile
-scikit-learn
-transformers
-```
-
----
-
-# REQUIRED START COMMAND
-
-```bash
-gunicorn run:app --timeout 300
-```
-
----
-
-# REQUIRED `render.yaml`
-
-```yaml
-services:
-  - type: web
-    name: moodflow-ai
-    env: python
-
-    buildCommand: |
-      apt-get update && apt-get install -y ffmpeg
-      pip install -r requirements.txt
-
-    startCommand: gunicorn run:app --timeout 300
-```
