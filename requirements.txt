@@ -12,11 +12,7 @@ protobuf==4.25.9
 wrapt==1.14.2
 opt-einsum==3.4.0
 h5py==3.14.0
-
-# PyTorch stack
-torch==2.11.0
-torchaudio==2.11.0
-torchvision==0.26.0
+gunicorn=26.0.0
 
 # Audio / Video processing
 librosa==0.10.1
@@ -27,7 +23,6 @@ imageio==2.37.3
 imageio-ffmpeg==0.6.0
 pillow==11.3.0
 ffmpeg-python==0.2.0
-moviepy==2.2.1
 
 # ML / Data
 scipy==1.17.1
