@@ -1,4 +1,9 @@
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' 
+
+import tensorflow as tf
+tf.config.threading.set_inter_op_parallelism_threads(1)
+tf.config.threading.set_intra_op_parallelism_threads(1)
 from datetime import timedelta, datetime
 from functools import wraps
 from collections import Counter
