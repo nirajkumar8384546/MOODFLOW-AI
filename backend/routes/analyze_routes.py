@@ -14,7 +14,7 @@ from backend.services.video_audio_fusion import predict_video   # 🔥 FIXED IMP
 
 analyze_bp = Blueprint("analyze_bp", __name__)
 
-FFMPEG_PATH = "ffmpeg"
+FFMPEG_PATH = r"ffmpeg"
 
 
 # ==========================
