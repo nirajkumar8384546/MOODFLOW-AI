@@ -4,7 +4,7 @@ Flask-SQLAlchemy
 gunicorn==21.2.0
 python-dotenv
 flask_migrate
-ffmpeg
+ffmpeg-python
 
 # Machine Learning (Core)
 tensorflow-cpu==2.15.0
@@ -19,6 +19,6 @@ opencv-python-headless
 soundfile
 pydub
 pillow
-
+transformers
 # Utilities
 requests
