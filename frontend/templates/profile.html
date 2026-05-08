@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>My Profile - MOODFLOW AI</title>
+
+    <!-- MAIN CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+</head>
+
+<body>
+
+    {% include 'header.html' %}
+
+    <div class="main_container">
+
+        <div class="profile_card">
+
+            <!-- IMAGE -->
+            <img class="profile-img-large"
+                src="{{ url_for('static', filename='uploads/' + (user.profile_pic or 'default.png')) }}">
+
+            <h2>{{ user.username }}</h2>
+            <div class="email">{{ user.email }}</div>
+
+            <!-- INFO -->
+            <div class="info">
+                <p><span>📞 Phone:</span> {{ user.phone or "Not provided" }}</p>
+                <p><span>🎂 DOB:</span> {{ user.dob.strftime('%d-%m-%Y') if user.dob else "Not set" }}</p>
+                <p><span>⚧ Gender:</span> {{ user.gender or "Not selected" }}</p>
+                <p><span>📍 Address:</span> {{ user.address or "Not provided" }}</p>
+                <p><span>📝 Bio:</span> {{ user.bio or "No bio yet" }}</p>
+            </div>
+
+            <!-- BUTTON -->
+            <a href="{{ url_for('user_bp.update_profile') }}" class="btn">✏️ Edit Profile</a>
+
+        </div>
+
+    </div>
+
+    {% include 'footer.html' %}
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+
+</html>

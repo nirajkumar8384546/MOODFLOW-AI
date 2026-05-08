@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>AI Emotion Detection</title>
+
+    <style>
+        /* ================= MAIN LAYOUT ================= */
+        .container-video-audio {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            max-width: 1100px;
+            height: auto;
+            margin: 100px auto;
+            /* CENTER */
+            padding: 20px;
+            border-radius: 15px;
+            flex-wrap: wrap;
+        }
+
+        /* ================= RESULT BOX ================= */
+        .result-box-v {
+            background: rgba(27, 27, 27, 1);
+            padding: 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 0 25px rgba(3, 3, 3, 0.5);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            /* CENTER TEXT */
+            height: 400px;
+        }
+
+        /* ================= VIDEO BOX ================= */
+        .video-box-v {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 25px rgba(244, 184, 6, 0.5);
+            margin: 20px auto;
+            /* CENTER VIDEO */
+            display: flex;
+            width: 100%;
+            max-width: 300px;
+            height: 200px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* ================= VIDEO ================= */
+        .video-v {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            border-radius: 12px;
+            border: 2px solid #4caf50;
+            box-shadow: 0 0 25px rgba(0, 255, 100, 0.6);
+            transition: 0.3s;
+        }
+
+        .video-v:hover {
+            transform: scale(1.02);
+        }
+
+        /* ================= BUTTON ================= */
+        button {
+            margin: 10px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #00c6ff, #0072ff);
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        /* ================= RESULT ================= */
+        #result-v {
+            margin-top: 20px;
+            font-size: 17px;
+            line-height: 1.6;
+        }
+
+        /* ================= LOADER ================= */
+        .loader-v {
+            border: 5px solid #ddd;
+            border-top: 5px solid #00c6ff;
+            border-radius: 50%;
+            width: 15px;
+            height: 35px;
+            animation: spin 1s linear infinite;
+            margin: 15px auto;
+            display: none;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ================= MOBILE ================= */
+        @media (max-width: 768px) {
+
+            .container-video-audio {
+                margin: 80px auto;
+                padding: 10px;
+            }
+
+            .result-box-v {
+                padding: 15px;
+            }
+
+            .video-v {
+                max-width: 100%;
+            }
+        }
+    </style>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    {% include 'header.html' %}
+
+    <div class="container-video-audio">
+
+        <!-- LEFT -->
+        <div class="result-box-v">
+
+            <button id="startBtn">▶ Start Detection</button>
+            <button onclick="refreshAll()">🔄 Reset</button>
+            <div class="video-box-v">
+                <video class="video-v" id="video" autoplay muted playsinline></video>
+            </div>
+
+            <div class="loader-v" id="loader"></div>
+
+            <div id="result-v">
+                🎯 Emotion: -- <br>
+                🔥 Confidence: --
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        let stream, recorder, chunks = [];
+        let lastCallTime = 0;   // 🔥 NEW: anti spam
+
+        const video = document.getElementById("video");
+        const resultBox = document.getElementById("result-v");
+        const startBtn = document.getElementById("startBtn");
+        const loader = document.getElementById("loader");
+
+        // 🔥 SAFE PERCENT FUNCTION
+        function fixPercent(val) {
+            val = parseFloat(val) || 0;
+            return Math.max(0, Math.min(val, 100)).toFixed(2);
+        }
+
+        // =========================
+        // START
+        // =========================
+        async function start() {
+
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: 1280, height: 720 },
+                    audio: true
+                });
+
+                video.srcObject = stream;
+
+                recorder = new MediaRecorder(stream);
+                chunks = [];
+
+                recorder.ondataavailable = e => {
+                    if (e.data.size > 0) chunks.push(e.data);
+                };
+
+                recorder.start();
+
+                startBtn.style.display = "none";
+                resultBox.innerHTML = "Recording... 🎤🎥 (5 sec)";
+
+                setTimeout(stop, 6000); // 🔥 SLOWER (was 5 sec)
+
+            } catch (err) {
+                resultBox.innerHTML = "Camera/Mic access denied ❌";
+                startBtn.style.display = "inline-block";
+                console.error(err);
+            }
+        }
+
+        // =========================
+        // STOP
+        // =========================
+        function stop() {
+
+            if (!recorder) return;
+
+            recorder.stop();
+
+            recorder.onstop = async () => {
+
+                // 🔥 SPAM PROTECTION (3 sec gap)
+                let now = Date.now();
+                if (now - lastCallTime < 3000) return;
+                lastCallTime = now;
+
+                try {
+                    loader.style.display = "block";
+                    resultBox.innerHTML = "Analyzing... 🧠";
+
+                    const blob = new Blob(chunks, { type: "video/webm" });
+
+                    const fd = new FormData();
+                    fd.append("video", blob);
+
+                    const res = await fetch("/analyze-fusion", {
+                        method: "POST",
+                        body: fd
+                    });
+
+                    const data = await res.json();
+
+                    loader.style.display = "none";
+
+                    // 🔥 SAFE VALUES
+                    const confidence = fixPercent(data.confidence);
+
+                    const emotion = data.emotion || "Neutral";
+
+                    resultBox.innerHTML =
+                        `🎯 Emotion: <b>${emotion}</b><br>
+                     🔥 Confidence: <b>${confidence}%</b>`;
+
+                } catch (err) {
+                    loader.style.display = "none";
+                    resultBox.innerHTML = "Error processing ❌";
+                    console.error(err);
+                }
+
+                startBtn.style.display = "inline-block";
+            };
+        }
+
+        // =========================
+        // RESET
+        // =========================
+        function refreshAll() {
+
+            resultBox.innerHTML = "🎯 Emotion: -- <br> 🔥 Confidence: --";
+
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+            }
+
+            loader.style.display = "none";
+            startBtn.style.display = "inline-block";
+
+            chunks = [];
+        }
+
+        startBtn.onclick = start;
+
+    </script>
+
+    {% include 'footer.html' %}
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>
