@@ -4,16 +4,28 @@ import numpy as np
 import os
 import tempfile
 import subprocess
-import gc  # 🔥 Garbage Collector for RAM
-from tensorflow.keras import backend as K  # 🔥 To clear TF sessions
+import sys
+import gc
+from tensorflow.keras import backend as K
 
 analyze_bp = Blueprint("analyze_bp", __name__)
 
-# Render/Linux par sirf 'ffmpeg' kaam karta hai
+# Render/Linux compatibility
 FFMPEG_PATH = "ffmpeg"
 
+# ==============================
+# 🔥 DEEP CACHE CLEANER
+# ==============================
+def clear_module_memory(module_names):
+    """Kaam khatam hote hi models aur cache ko RAM se nikalne ke liye"""
+    K.clear_session()
+    for name in module_names:
+        if name in sys.modules:
+            del sys.modules[name]
+    gc.collect()
+
 # ==========================
-# 🎯 NORMALIZE EMOTION
+# 🎯 NORMALIZE EMOTION (Tere Logic ke saath)
 # ==========================
 def normalize_emotion(label):
     if not label:
@@ -40,6 +52,7 @@ def convert_to_wav(input_path):
         ]
         result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if result.returncode != 0:
+            print("❌ FFmpeg Error:", result.stderr.decode())
             return None
         return output_path if os.path.exists(output_path) else None
     except Exception as e:
@@ -51,7 +64,7 @@ def convert_to_wav(input_path):
 # ==========================
 @analyze_bp.route("/face-emotion", methods=["POST"])
 def analyze_face():
-    # 🔥 LOCAL IMPORT: RAM tabhi use hogi jab function call hoga
+    # 🔥 Local Import (Lazy Load)
     from backend.services.face_emotion import detect_face_emotion
     try:
         if 'image' not in request.files:
@@ -65,15 +78,16 @@ def analyze_face():
             return jsonify({"error": "Invalid image"}), 400
 
         label, conf = detect_face_emotion(frame)
-
-        # 🔥 Memory Clean-up
-        K.clear_session()
-        gc.collect()
-
-        return jsonify({
+        
+        response = jsonify({
             "emotion": normalize_emotion(label),
             "confidence": round(min(max(conf * 100, 0), 100), 2)
         })
+
+        # 🔥 Cache Clear after prediction
+        clear_module_memory(['backend.services.face_emotion'])
+        return response
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -82,7 +96,6 @@ def analyze_face():
 # ==========================
 @analyze_bp.route("/analyze-audio-text", methods=["POST"])
 def analyze_audio_text():
-    # 🔥 LOCAL IMPORTS
     from backend.services.audio_emotion import detect_audio_emotion
     from backend.services.text_emotion import detect_text_emotion
     
@@ -96,7 +109,7 @@ def analyze_audio_text():
         original_text = text
         text_lower = text.lower()
 
-        # 🧠 TEXT
+        # 🧠 TEXT LOGIC (Unchanged)
         text_label, text_conf = detect_text_emotion(text)
         text_label = normalize_emotion(text_label)
         text_conf = float(text_conf)
@@ -104,7 +117,7 @@ def analyze_audio_text():
         text_conf = (text_conf * 0.85) + 7
         text_conf = max(0, min(text_conf, 100))
 
-        # 🎤 AUDIO
+        # 🎤 AUDIO LOGIC (Unchanged)
         audio_label, audio_conf = "no_audio", 0.0
         if 'audio' in request.files:
             audio_file = request.files['audio']
@@ -129,7 +142,7 @@ def analyze_audio_text():
                     if os.path.exists(temp_audio.name): os.unlink(temp_audio.name)
                     if wav_path and os.path.exists(wav_path): os.unlink(wav_path)
 
-        # ⚖️ FINAL DECISION
+        # ⚖️ FINAL DECISION (Original Logic)
         final_label = text_label
         final_conf = text_conf
         keywords = ["happy", "sad", "angry", "fear", "disgust"]
@@ -144,11 +157,7 @@ def analyze_audio_text():
             final_label = audio_label
             final_conf = audio_conf
 
-        # 🔥 Memory Clean-up
-        K.clear_session()
-        gc.collect()
-
-        return jsonify({
+        response = jsonify({
             "text_emotion": text_label,
             "text_confidence": round(text_conf, 2),
             "audio_emotion": audio_label,
@@ -156,15 +165,19 @@ def analyze_audio_text():
             "final_emotion": normalize_emotion(final_label),
             "final_confidence": round(final_conf, 2)
         })
+
+        # 🔥 Deep clean both modules
+        clear_module_memory(['backend.services.audio_emotion', 'backend.services.text_emotion'])
+        return response
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 # ==========================
-# 🎥 VIDEO + AUDIO (MAIN)
+# 🎥 VIDEO + AUDIO (FUSION)
 # ==========================
 @analyze_bp.route("/analyze-fusion", methods=["POST"])
 def analyze_fusion():
-    # 🔥 LOCAL IMPORTS
     from backend.services.video_audio_fusion import predict_video
     from backend.services.audio_emotion import detect_audio_emotion
 
@@ -181,34 +194,31 @@ def analyze_fusion():
 
         try:
             video_file.save(temp_video.name)
-            # 🎥 VIDEO MODEL
             video_label, video_conf = predict_video(temp_video.name)
-            # 🎤 AUDIO EXTRACT
             audio_path = convert_to_wav(temp_video.name)
             if audio_path:
                 audio_label, audio_conf = detect_audio_emotion(audio_path)
             else:
                 audio_label, audio_conf = "Neutral", 0.0
-
         finally:
             temp_video.close()
             if os.path.exists(temp_video.name): os.unlink(temp_video.name)
             if audio_path and os.path.exists(audio_path): os.unlink(audio_path)
 
-        # 🔥 FUSION LOGIC
         if audio_conf > video_conf:
             final_label, final_conf = audio_label, audio_conf
         else:
             final_label, final_conf = video_label, video_conf
 
-        # 🔥 Memory Clean-up
-        K.clear_session()
-        gc.collect()
-
-        return jsonify({
+        response = jsonify({
             "emotion": normalize_emotion(final_label),
             "confidence": round(min(max(final_conf, 0), 100), 2)
         })
+
+        # 🔥 Release Fusion and Audio memory
+        clear_module_memory(['backend.services.video_audio_fusion', 'backend.services.audio_emotion'])
+        return response
+
     except Exception as e:
         print("❌ Fusion Error:", e)
         return jsonify({"error": str(e)}), 500
