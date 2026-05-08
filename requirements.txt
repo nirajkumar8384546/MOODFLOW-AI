@@ -4,6 +4,7 @@ Flask-SQLAlchemy
 gunicorn==21.2.0
 python-dotenv
 flask_migrate
+ffmpeg
 
 # Machine Learning (Core)
 tensorflow-cpu==2.15.0
