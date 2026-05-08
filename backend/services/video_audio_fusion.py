@@ -1,5 +1,3 @@
-# services/video_audio_fusion.py
-#video_audio_fusion.py
 import cv2
 import os
 import tempfile
@@ -7,31 +5,22 @@ import numpy as np
 import subprocess
 import tensorflow as tf
 import librosa
-
-# ✅ ADD THIS IMPORT
+import gc
+from tensorflow.keras import backend as K
 from backend.utils.save_mood import save_mood
 
 # -----------------------------
 # PATHS
 # -----------------------------
-MODEL_PATH = "backend/model/emotion_model.h5"
-LABEL_PATH = "backend/model/labels.npy"
+MODEL_PATH = "backend/models/emotion_model.h5" # Path fix (model vs models)
+LABEL_PATH = "backend/models/labels.npy"
 
-# -----------------------------
-# SAFE MODEL LOAD (🔥 FIX)
-# -----------------------------
-model = None
-LABELS = ["Neutral"]
-FFMPEG_PATH = r"C:\ffmpeg\bin\ffmpeg.exe"
-if os.path.exists(MODEL_PATH) and os.path.exists(LABEL_PATH):
-    try:
-        model = tf.keras.models.load_model(MODEL_PATH)
-        LABELS = np.load(LABEL_PATH)
-        print("✅ Model loaded")
-    except Exception as e:
-        print("❌ Model load failed:", e)
-else:
-    print("✅ Multimodel loaded")
+# Global pointers
+_fusion_model = None
+_fusion_labels = None
+
+# Render/Linux compatibility (Windows path removed)
+FFMPEG_PATH = "ffmpeg"
 
 # -----------------------------
 # CONSTANTS
@@ -50,7 +39,7 @@ def extract_face_features(frame):
     return gray.flatten()
 
 # -----------------------------
-# AUDIO FEATURES
+# AUDIO FEATURES (Optimized)
 # -----------------------------
 def extract_audio_features(audio_path, sr=22050):
     try:
@@ -58,11 +47,15 @@ def extract_audio_features(audio_path, sr=22050):
         audio, _ = librosa.effects.trim(audio)
 
         if len(audio) < 1000:
+            del audio
             return np.zeros(AUDIO_FEATURE_DIM)
 
         mfcc = librosa.feature.mfcc(y=audio, sr=sr, n_mfcc=AUDIO_FEATURE_DIM)
-        return np.mean(mfcc.T, axis=0)
-
+        feat = np.mean(mfcc.T, axis=0)
+        
+        # 🔥 Clear audio from RAM
+        del audio
+        return feat
     except Exception as e:
         print("❌ Audio feature error:", e)
         return np.zeros(AUDIO_FEATURE_DIM)
@@ -72,10 +65,9 @@ def extract_audio_features(audio_path, sr=22050):
 # -----------------------------
 def extract_audio(video_path):
     temp_audio = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
-
     try:
         subprocess.run([
-            "ffmpeg", "-y",
+            FFMPEG_PATH, "-y",
             "-i", video_path,
             "-ac", "1",
             "-ar", "22050",
@@ -84,10 +76,8 @@ def extract_audio(video_path):
 
         if os.path.exists(temp_audio.name):
             return temp_audio.name
-
     except Exception as e:
         print("❌ FFmpeg error:", e)
-
     return None
 
 # -----------------------------
@@ -96,78 +86,78 @@ def extract_audio(video_path):
 def extract_frames(video_path):
     cap = cv2.VideoCapture(video_path)
     frames = []
-
     total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    if total <= 0: return [np.zeros((48, 48, 3), dtype=np.uint8)]
+    
     step = max(1, total // FRAMES_TO_SAMPLE)
-
     i = 0
-    while True:
+    while len(frames) < FRAMES_TO_SAMPLE:
         ret, frame = cap.read()
-        if not ret:
-            break
-
+        if not ret: break
         if i % step == 0:
             frames.append(frame)
-
         i += 1
-
     cap.release()
-
-    if len(frames) == 0:
-        return [np.zeros((48, 48, 3), dtype=np.uint8)]
-
-    return frames
+    return frames if frames else [np.zeros((48, 48, 3), dtype=np.uint8)]
 
 # -----------------------------
-# 🔥 TRAINING FUNCTION
-# -----------------------------
-def process_video(video_path):
-    audio_feat = np.zeros(AUDIO_FEATURE_DIM)
-    audio_path = extract_audio(video_path)
-
-    if audio_path:
-        try:
-            audio_feat = extract_audio_features(audio_path)
-        finally:
-            if os.path.exists(audio_path):
-                os.unlink(audio_path)
-
-    frames = extract_frames(video_path)
-
-    frame_feats = np.array([
-        extract_face_features(f) for f in frames
-    ])
-
-    face_feat = np.mean(frame_feats, axis=0)
-
-    return np.concatenate([face_feat, audio_feat])
-
-# -----------------------------
-# 🎯 INFERENCE FUNCTION
+# 🎯 INFERENCE FUNCTION (Deep Cleaned)
 # -----------------------------
 def predict_video(video_path):
+    global _fusion_model, _fusion_labels
+    
+    try:
+        # 1. Lazy Load Model & Labels
+        if _fusion_model is None:
+            if os.path.exists(MODEL_PATH) and os.path.exists(LABEL_PATH):
+                _fusion_model = tf.keras.models.load_model(MODEL_PATH)
+                _fusion_labels = np.load(LABEL_PATH)
+            else:
+                print("❌ Model/Labels not found at paths")
+                return "Neutral", 0.0
 
-    if model is None:
-        emotion = "Neutral"
-        save_mood(emotion)   # ✅ ADD
-        return emotion, 0.0
+        # 2. Process Audio
+        audio_feat = np.zeros(AUDIO_FEATURE_DIM)
+        audio_path = extract_audio(video_path)
+        if audio_path:
+            audio_feat = extract_audio_features(audio_path)
+            if os.path.exists(audio_path): os.unlink(audio_path)
 
-    feat = process_video(video_path)
-    combined = feat[np.newaxis, :]
+        # 3. Process Video Frames
+        frames = extract_frames(video_path)
+        frame_feats = np.array([extract_face_features(f) for f in frames])
+        face_feat = np.mean(frame_feats, axis=0)
 
-    pred = model.predict(combined, verbose=0)[0]
+        # 4. Fusion & Prediction
+        feat = np.concatenate([face_feat, audio_feat])
+        combined = feat[np.newaxis, :]
+        pred = _fusion_model.predict(combined, verbose=0)[0]
 
-    idx = int(np.argmax(pred))
-    confidence = float(pred[idx]) * 100
+        idx = int(np.argmax(pred))
+        confidence = float(pred[idx]) * 100
+        label = str(_fusion_labels[idx]).capitalize() if idx < len(_fusion_labels) else "Neutral"
 
-    confidence = max(0.0, min(confidence, 100.0))
+        # Save Mood
+        save_mood(label)
 
-    label = LABELS[idx] if idx < len(LABELS) else "Neutral"
+        # 🔥 5. TOTAL RAM PURGE
+        # Pointers clean karo aur sessions kill karo
+        del _fusion_model
+        del _fusion_labels
+        _fusion_model = None
+        _fusion_labels = None
+        
+        del frame_feats
+        del frames
+        
+        K.clear_session()
+        gc.collect()
 
-    # ✅ normalize (optional but clean)
-    label = str(label).capitalize()
+        return label, round(confidence, 2)
 
-    # ✅ FINAL SAVE (MOST IMPORTANT)
-    save_mood(label)
-
-    return label, round(confidence, 2)
+    except Exception as e:
+        print(f"❌ Fusion Error: {e}")
+        K.clear_session()
+        gc.collect()
+        save_mood("Neutral")
+        return "Neutral", 0.0
