@@ -257,7 +257,9 @@ def handle_error(e):
     return jsonify({
         "error": str(e)
     }), 500
-
+with app.app_context():
+    db.create_all()
+    print("✅ Database tables created successfully!")
 # ==============================
 # RUN
 # ==============================
