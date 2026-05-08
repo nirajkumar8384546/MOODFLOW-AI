@@ -1,46 +1,22 @@
-#requirements.txt
-# TensorFlow stack
-tensorflow>=2.15.0
-tensorflow-intel>=2.15.0
+# Web Framework
+Flask==3.0.0
+Flask-SQLAlchemy
+gunicorn==21.2.0
+python-dotenv
+
+# Machine Learning (Core)
+tensorflow==2.15.0
 keras==2.15.0
-ml-dtypes==0.2.0
-numpy==1.25.2
-astunparse==1.6.3
-gast==0.7.0
-google-pasta==0.2.0
-protobuf==4.25.9
-wrapt==1.14.2
-opt-einsum==3.4.0
-h5py==3.14.0
-gunicorn==26.0.0
+numpy<2.0.0
+scikit-learn
+h5py
 
-# Audio / Video processing
-librosa==0.10.1
-opencv-python==4.7.0.72
-soundfile==0.13.1
-pydub==0.25.1
-imageio==2.37.3
-imageio-ffmpeg==0.6.0
-pillow==11.3.0
-ffmpeg-python==0.2.0
-
-# ML / Data
-scipy==1.17.1
-scikit-learn==1.8.0
-
-# Flask backend
-Flask==3.1.2
-Flask-SQLAlchemy==3.1.1
-Jinja2==3.1.6
-Werkzeug==3.1.5
-itsdangerous==2.2.0
+# Audio & Video Processing
+librosa
+opencv-python-headless
+soundfile
+pydub
+pillow
 
 # Utilities
-python-dotenv==1.2.2
-decorator==5.2.1
-tqdm==4.67.3
-requests==2.32.5
-packaging==26.0
-six==1.17.0
-termcolor==3.3.0
-proglog==0.1.12
+requests
