@@ -1,6 +1,6 @@
 #requirements.txt
 # TensorFlow stack
-pip=26.1.1
+python=3.11.9
 tensorflow==2.15.0
 tensorflow-intel==2.15.0
 keras==2.15.0
