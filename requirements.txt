@@ -1,6 +1,6 @@
 #requirements.txt
 # TensorFlow stack
-tensorflow==2.15.0
+tensorflow>=2.15.0
 tensorflow-intel==2.15.0
 keras==2.15.0
 ml-dtypes==0.2.0
