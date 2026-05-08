@@ -12,7 +12,8 @@ protobuf==4.25.9
 wrapt==1.14.2
 opt-einsum==3.4.0
 h5py==3.14.0
-gunicorn=26.0.0
+gunicorn==26.0.0
+python==3.11.9
 
 # Audio / Video processing
 librosa==0.10.1
