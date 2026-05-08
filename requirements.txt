@@ -3,6 +3,7 @@ Flask==3.0.0
 Flask-SQLAlchemy
 gunicorn==21.2.0
 python-dotenv
+Flask-Migrate
 
 # Machine Learning (Core)
 tensorflow==2.15.0
