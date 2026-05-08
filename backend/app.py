@@ -13,9 +13,8 @@ from backend.routes.analyze_routes import analyze_bp
 from backend.routes.user_routes import user_bp
 
 # ==============================
-# SMART PATH HANDLING (Fixes TemplateNotFound)
+#  PATH HANDLING 
 # ==============================
-# Ye path dhundega ki 'frontend' folder kahan hai
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 app = Flask(
@@ -37,7 +36,7 @@ app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=app.config.get("SES
 app.config["SESSION_PERMANENT"] = True
 
 # ==============================
-# AUTO-CREATE DATABASE (Fixes 'no such table' error)
+# AUTO-CREATE DATABASE 
 # ==============================
 with app.app_context():
     try:
